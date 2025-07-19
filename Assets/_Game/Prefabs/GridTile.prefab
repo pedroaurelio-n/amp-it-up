@@ -47,12 +47,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c293f6d07a8244e684bea6b3ec617212, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  isGenerator: 0
-  isStructure: 0
-  isObstacle: 0
+  <IsGenerator>k__BackingField: 0
+  <IsStructure>k__BackingField: 0
+  <IsPole>k__BackingField: 0
+  <IsObstacle>k__BackingField: 0
   materialList:
   - {fileID: 2100000, guid: 06640700cbf307c4a95bb59709a0dddf, type: 2}
   - {fileID: 2100000, guid: aee5ac79cf781924fa37290f8979a8c5, type: 2}
+  - {fileID: 2100000, guid: 362be8f36049dee4e9f6568c8bccd25b, type: 2}
   - {fileID: 2100000, guid: 778662bb364497a43bbbcf6c64fc07d0, type: 2}
   - {fileID: 2100000, guid: 8267bb5828d95f140ab21104b4107f5d, type: 2}
   mesh: {fileID: 3296661984105355982}

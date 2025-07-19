@@ -3,22 +3,25 @@ using UnityEngine;
 
 public class GridTile : MonoBehaviour
 {
-    [SerializeField] bool isGenerator;
-    [SerializeField] bool isStructure;
-    [SerializeField] bool isObstacle;
+    [field: SerializeField] public bool IsGenerator { get; private set;  }
+    [field: SerializeField] public bool IsStructure { get; private set;  }
+    [field: SerializeField] public bool IsPole { get; private set;  }
+    [field: SerializeField] public bool IsObstacle { get; private set;  }
 
     [SerializeField] Material[] materialList;
     [SerializeField] MeshRenderer mesh;
 
     void OnValidate ()
     {
-        if (isGenerator)
+        if (IsGenerator)
             mesh.material = materialList[0];
-        else if (isStructure)
+        else if (IsStructure)
             mesh.material = materialList[1];
-        else if (isObstacle)
+        else if (IsPole)
             mesh.material = materialList[2];
-        else
+        else if (IsObstacle)
             mesh.material = materialList[3];
+        else
+            mesh.material = materialList[4];
     }
 }
