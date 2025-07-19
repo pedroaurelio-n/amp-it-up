@@ -48,6 +48,22 @@ public class WirePlacer : MonoBehaviour
 
     void Update ()
     {
+        wireUI.SetMinusWireText(false);
+        if (GhostWire != null && GhostWire.LineRenderer.positionCount > 1)
+        {
+            bool isConnectedToPole = gridGenerator.GetTileByCenterPoint(GhostWire.LineRenderer.GetPosition(0)).IsPole
+                                     || gridGenerator.GetTileByCenterPoint(GhostWire.LineRenderer.GetPosition(
+                                                 GhostWire.LineRenderer.positionCount - 1)
+                                         ).IsPole;
+            float multiplier = isConnectedToPole ? 0.75f : 1f;
+            float cost = (GhostWire.LineRenderer.positionCount - 1 ) * multiplier;
+            int roundedCost = Mathf.RoundToInt(cost);
+            wireUI.SetMinusWireText(true, isConnectedToPole, $"-{roundedCost}");
+        }
+        
+        if (!LevelManager.Instance.CanInput)
+            return;
+        
         if (Input.GetMouseButtonDown(2) || Input.mouseScrollDelta.y != 0)
         {
             if (!autoWirePlacer.IsPlacing && !manualWirePlacer.IsPlacing)
@@ -61,12 +77,6 @@ public class WirePlacer : MonoBehaviour
 
         if (Input.GetMouseButtonDown(1))
             ClearPreviousWire();
-
-        wireUI.SetMinusWireText(false);
-        if (GhostWire != null && GhostWire.LineRenderer.positionCount > 1)
-        {
-            wireUI.SetMinusWireText(true, $"-{GhostWire.LineRenderer.positionCount - 1}");
-        }
     }
     
     public void RefreshVisitedTiles ()

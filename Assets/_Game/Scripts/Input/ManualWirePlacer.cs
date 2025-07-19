@@ -17,6 +17,7 @@ public class ManualWirePlacer : MonoBehaviour
     GridGenerator _gridGenerator;
     Vector3? _startPoint;
     HashSet<Vector3> _localVisitedTiles = new();
+    bool _isActive = true;
 
     public void Setup (WirePlacer wirePlacer, GridGenerator gridGenerator)
     {
@@ -36,6 +37,9 @@ public class ManualWirePlacer : MonoBehaviour
 
     void Update ()
     {
+        if (!_isActive)
+            return;
+        
         if (Input.GetMouseButtonDown(0))
         {
             if (TryRaycastTile(out Vector3? tileCenter))
@@ -89,6 +93,9 @@ public class ManualWirePlacer : MonoBehaviour
                 _wirePlacer.GhostWire.LineRenderer.positionCount = _wirePoints.Count;
             }
         }
+        
+        if (!LevelManager.Instance.CanInput)
+            _isActive = false;
     }
 
     bool TryRaycastTile (out Vector3? tileCenter)
@@ -161,7 +168,12 @@ public class ManualWirePlacer : MonoBehaviour
         if (!isFinal)
             return;
         
-        if (!LevelManager.Instance.TryConsumeWire(_wirePoints.Count - 1))
+        bool isConnectedToPole = _gridGenerator.GetTileByCenterPoint(_wirePoints[0]).IsPole
+                                 || _gridGenerator.GetTileByCenterPoint(_wirePoints[^1]).IsPole;
+        float multiplier = isConnectedToPole ? 0.75f : 1f;
+        float cost = (_wirePoints.Count - 1 ) * multiplier;
+        int roundedCost = Mathf.RoundToInt(cost);
+        if (!LevelManager.Instance.TryConsumeWire(roundedCost))
         {
             ClearCurrentLine(wire);
             return;
@@ -184,6 +196,7 @@ public class ManualWirePlacer : MonoBehaviour
         
         Reset();
         LevelManager.Instance.RecalculatePowerFlow();
+        _wirePlacer.CurrentWire.Price = roundedCost;
             
         Destroy(_wirePlacer.GhostWire.gameObject);
     }

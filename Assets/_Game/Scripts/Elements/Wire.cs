@@ -14,7 +14,7 @@ public class Wire : MonoBehaviour
         LineRenderer.GetPosition(LineRenderer.positionCount - 1).z
     );
 
-    public int Length => LineRenderer.positionCount - 1;
+    public int Price { get; set; }
     public bool IsPowered { get; private set; }
 
     GridGenerator _gridGenerator;

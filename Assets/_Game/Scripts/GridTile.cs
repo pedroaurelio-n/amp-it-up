@@ -11,6 +11,51 @@ public class GridTile : MonoBehaviour
     [SerializeField] Material[] materialList;
     [SerializeField] MeshRenderer mesh;
 
+    void Awake()
+    {
+        if (!IsGenerator && !IsStructure && !IsPole)
+        {
+            RemoveComponentIfExists<Generator>();
+            RemoveComponentIfExists<Structure>();
+            RemoveComponentIfExists<Pole>();
+            return;
+        }
+        
+        if (IsGenerator)
+        {
+            if (!TryGetComponent(out Generator _))
+                gameObject.AddComponent<Generator>();
+
+            RemoveComponentIfExists<Structure>();
+            RemoveComponentIfExists<Pole>();
+        }
+        else if (IsStructure)
+        {
+            if (!TryGetComponent(out Structure _))
+                gameObject.AddComponent<Structure>();
+
+            RemoveComponentIfExists<Generator>();
+            RemoveComponentIfExists<Pole>();
+        }
+        else if (IsPole)
+        {
+            if (!TryGetComponent(out Pole _))
+                gameObject.AddComponent<Pole>();
+
+            RemoveComponentIfExists<Generator>();
+            RemoveComponentIfExists<Structure>();
+        }
+    }
+
+    void RemoveComponentIfExists<T>() where T : Component
+    {
+        T component = GetComponent<T>();
+        if (component != null)
+        {
+            Destroy(component);
+        }
+    }
+
     void OnValidate ()
     {
         if (IsGenerator)
