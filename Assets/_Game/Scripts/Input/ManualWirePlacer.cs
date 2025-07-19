@@ -59,7 +59,7 @@ public class ManualWirePlacer : MonoBehaviour
                     _startPoint = tileCenter;
                     
                     _wirePlacer.GhostWire = Instantiate(ghostWirePrefab, transform.position, Quaternion.identity, _wirePlacer.transform);
-                    _wirePlacer.GhostWire.LineRenderer.SetPosition(0, _startPoint.Value + Vector3.up * 3);
+                    _wirePlacer.GhostWire.LineRenderer.SetPosition(0, _startPoint.Value + Vector3.up * 0.5f);
                     TryStartOrExtendWire();
                     return;
                 }
@@ -79,8 +79,8 @@ public class ManualWirePlacer : MonoBehaviour
                 {
                     _wirePlacer.GhostWire.LineRenderer.positionCount = _wirePoints.Count + 1;
                     for (int i = 0; i < _wirePoints.Count; i++)
-                        _wirePlacer.GhostWire.LineRenderer.SetPosition(i, _wirePoints[i] + Vector3.up * 3);
-                    _wirePlacer.GhostWire.LineRenderer.SetPosition(_wirePoints.Count, endPoint + Vector3.up * 3);
+                        _wirePlacer.GhostWire.LineRenderer.SetPosition(i, _wirePoints[i] + Vector3.up * 0.5f);
+                    _wirePlacer.GhostWire.LineRenderer.SetPosition(_wirePoints.Count, endPoint + Vector3.up * 0.5f);
                 }
                 else
                     _wirePlacer.GhostWire.LineRenderer.positionCount = _wirePoints.Count;
@@ -162,7 +162,7 @@ public class ManualWirePlacer : MonoBehaviour
         {
             Vector3 point = _wirePoints[index];
             wire.LineRenderer.positionCount = _wirePoints.Count;
-            wire.LineRenderer.SetPosition(index,point + Vector3.up * 3);
+            wire.LineRenderer.SetPosition(index,point + Vector3.up * 0.5f);
         }
 
         if (!isFinal)

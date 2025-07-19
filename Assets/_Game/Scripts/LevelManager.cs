@@ -39,8 +39,8 @@ public class LevelManager : MonoBehaviour
     
     public bool TryConsumeWire (int length)
     {
-        if (_usedWireLength + length > startingWireLength)
-            return false;
+        // if (_usedWireLength + length > startingWireLength)
+        //     return false;
         
         _usedWireLength += length;
         UpdateWireUI();
@@ -84,7 +84,7 @@ public class LevelManager : MonoBehaviour
         foreach (Wire wire in allWires)
             wire.SetPoweredState(poweredWires.Contains(wire));
 
-        if (poweredStructures.Count != structures.Count)
+        if (poweredStructures.Count != structures.Count || RemainingWireLength < 0)
             return;
 
         CanInput = false;

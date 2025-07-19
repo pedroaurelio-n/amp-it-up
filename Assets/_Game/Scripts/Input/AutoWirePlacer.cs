@@ -235,7 +235,7 @@ public class AutoWirePlacer : MonoBehaviour
         {
             Vector3 point = _wirePoints[index];
             wire.LineRenderer.positionCount = _wirePoints.Count;
-            wire.LineRenderer.SetPosition(index,point + Vector3.up * 3);
+            wire.LineRenderer.SetPosition(index,point + Vector3.up * 0.5f);
         }
         
         if (isFinal)

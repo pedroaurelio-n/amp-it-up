@@ -7,22 +7,25 @@ public class EndLevelUI : MonoBehaviour
     [SerializeField] Button nextButton;
     [SerializeField] Button restartButton;
     [SerializeField] Button menuButton;
+    [SerializeField] bool forceInitialize;
     
     bool _initialized;
     
     void Update ()
     {
-        if (_initialized)
+        if (_initialized && !forceInitialize)
             return;
+        if (forceInitialize && !_initialized)
+            HandleLevelCompleted();
         LevelManager.Instance.OnLevelCompleted += HandleLevelCompleted;
         _initialized = true;
     }
 
     void HandleLevelCompleted ()
     {
-        panelObject.SetActive(true);
-        nextButton.onClick.AddListener(GameManager.AdvanceLevel);
-        restartButton.onClick.AddListener(GameManager.RestartLevel);
-        menuButton.onClick.AddListener(GameManager.GoToMainMenu);
+        panelObject?.SetActive(true);
+        nextButton?.onClick.AddListener(GameManager.AdvanceLevel);
+        restartButton?.onClick.AddListener(GameManager.RestartLevel);
+        menuButton?.onClick.AddListener(GameManager.GoToMainMenu);
     }
 }
