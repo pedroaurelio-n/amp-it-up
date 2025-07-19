@@ -6,8 +6,13 @@ public class Wire : MonoBehaviour
 
     [SerializeField] Material[] materials;
     
-    public Vector3 StartPoint => LineRenderer.GetPosition(0);
-    public Vector3 EndPoint => LineRenderer.GetPosition(LineRenderer.positionCount - 1);
+    public Vector3 StartPoint => new(LineRenderer.GetPosition(0).x, 0f, LineRenderer.GetPosition(0).z);
+
+    public Vector3 EndPoint => new(
+        LineRenderer.GetPosition(LineRenderer.positionCount - 1).x,
+        0f,
+        LineRenderer.GetPosition(LineRenderer.positionCount - 1).z
+    );
 
     public int Length => LineRenderer.positionCount - 1;
     public bool IsPowered { get; private set; }

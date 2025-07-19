@@ -47,6 +47,7 @@ public static class PowerPathFinder
     {
         HashSet<GridTile> visitedTiles = new();
         Queue<GridTile> queue = new();
+        HashSet<Wire> evaluatedWires = new();
         
         GridTile root = generator.GetComponent<GridTile>();
         queue.Enqueue(root);
@@ -58,6 +59,9 @@ public static class PowerPathFinder
             
             foreach (Wire wire in allWires)
             {
+                if (!evaluatedWires.Contains(wire))
+                    wire.SetPoweredState(false);
+                
                 GridTile startTile = wire.GetStartTile();
                 GridTile endTile = wire.GetEndTile();
                 
@@ -72,6 +76,7 @@ public static class PowerPathFinder
                     continue;
 
                 wire.SetPoweredState(true);
+                evaluatedWires.Add(wire);
                 visitedTiles.Add(neighbor);
                 if (neighbor.IsPole || neighbor.IsGenerator)
                     queue.Enqueue(neighbor);

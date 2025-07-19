@@ -1,22 +1,39 @@
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.Serialization;
 
-public class WirePlacer : MonoBehaviour
+public class AutoWirePlacer : MonoBehaviour
 {
-    [SerializeField] GridGenerator gridGenerator;
     [SerializeField] Wire wirePrefab;
     [SerializeField] Wire ghostWirePrefab;
     [SerializeField] LayerMask tileLayer;
+    
+    public bool IsPlacing { get; private set; }
 
     List<Vector3> _wirePoints = new();
-    HashSet<Vector3> _visitedTiles = new();
-    List<Wire> _wires = new();
-
-    bool _isPlacing;
+    
+    WirePlacer _wirePlacer;
+    GridGenerator _gridGenerator;
     Vector3? _startPoint;
-    Wire _currentWire;
-    Wire _ghostWire;
+    HashSet<Vector3> _localVisitedTiles = new();
+
+    public void Setup (WirePlacer wirePlacer, GridGenerator gridGenerator)
+    {
+        _wirePlacer = wirePlacer;
+        _gridGenerator = gridGenerator;
+    }
+
+    public void Reset ()
+    {
+        IsPlacing = false;
+        _startPoint = null;
+        ClearWirePoints();
+        _localVisitedTiles.Clear();
+    }
+    
+    public void ClearWirePoints() => _wirePoints.Clear();
 
     void Update ()
     {
@@ -27,9 +44,12 @@ public class WirePlacer : MonoBehaviour
                 if (tileCenter == null)
                     return;
 
-                GridTile tile = gridGenerator.GetTileByCenterPoint(tileCenter.Value);
+                GridTile tile = _gridGenerator.GetTileByCenterPoint(tileCenter.Value);
                 if (tile == null || tile.IsObstacle)
+                {
+                    ClearCurrentLine(_wirePlacer.CurrentWire);
                     return;
+                }
                 
                 if (_startPoint == null)
                 {
@@ -38,46 +58,46 @@ public class WirePlacer : MonoBehaviour
                     
                     _startPoint = tileCenter;
 
-                    _isPlacing = true;
-                    _currentWire = Instantiate(wirePrefab, transform.position, Quaternion.identity, transform);
+                    IsPlacing = true;
+                    _wirePlacer.CurrentWire = Instantiate(wirePrefab, transform.position, Quaternion.identity, _wirePlacer.transform);
+                    _wirePlacer.CurrentWire.LineRenderer.positionCount = 0;
                     return;
                 }
 
-                if (!tile.IsStructure && !tile.IsPole && !tile.IsGenerator)
+                if (tile.IsObstacle || (!tile.IsStructure && !tile.IsPole && !tile.IsGenerator))
                 {
-                    ClearCurrentLine(_currentWire);
+                    ClearCurrentLine(_wirePlacer.CurrentWire);
                     return;
                 }
                 
                 Vector3 endPoint = tileCenter.Value;
-                GeneratePath(_currentWire, _startPoint.Value, endPoint, true);
+                GenerateAutomaticPath(_wirePlacer.CurrentWire, _startPoint.Value, endPoint, true);
                 _startPoint = null;
-                _currentWire = null;
-                _isPlacing = false;
+                _wirePlacer.CurrentWire = null;
+                IsPlacing = false;
             }
+            else
+                ClearCurrentLine(_wirePlacer.CurrentWire);
         }
         
-        if (_isPlacing)
+        if (IsPlacing)
         {
-            if (_ghostWire == null)
-                _ghostWire = Instantiate(ghostWirePrefab, transform.position, Quaternion.identity, transform);
+            if (_wirePlacer.GhostWire == null)
+                _wirePlacer.GhostWire = Instantiate(ghostWirePrefab, transform.position, Quaternion.identity, _wirePlacer.transform);
         
             if (TryRaycastTile(out Vector3? tileCenter))
             {
                 if (tileCenter == null)
                     return;
                 Vector3 endPoint = tileCenter.Value;
-                GeneratePath(_ghostWire, _startPoint.Value, endPoint, false);
+                GenerateAutomaticPath(_wirePlacer.GhostWire, _startPoint.Value, endPoint, false);
             }
         }
         else
         {
-            if (_ghostWire != null)
-                Destroy(_ghostWire.gameObject);
+            if (_wirePlacer.GhostWire != null)
+                Destroy(_wirePlacer.GhostWire.gameObject);
         }
-
-        if (Input.GetMouseButtonDown(1))
-            ClearWires();
     }
 
     bool TryRaycastTile (out Vector3? tileCenter)
@@ -94,10 +114,10 @@ public class WirePlacer : MonoBehaviour
         return success;
     }
 
-    void GeneratePath (Wire wire, Vector3 startPoint, Vector3 endPoint, bool isFinal)
+    void GenerateAutomaticPath (Wire wire, Vector3 startPoint, Vector3 endPoint, bool isFinal)
     {
-        Vector3Int start = gridGenerator.WorldToGrid(startPoint);
-        Vector3Int end = gridGenerator.WorldToGrid(endPoint);
+        Vector3Int start = _gridGenerator.WorldToGrid(startPoint);
+        Vector3Int end = _gridGenerator.WorldToGrid(endPoint);
 
         HashSet<Vector3Int> closed = new();
         List<Node> open = new() { new Node(start) };
@@ -117,8 +137,9 @@ public class WirePlacer : MonoBehaviour
                 Node temp = current;
                 while (temp != null)
                 {
-                    Vector3 worldPos = gridGenerator.GridToWorld(temp.Position);
-                    if (_visitedTiles.Contains(worldPos) && worldPos != startPoint)
+                    Vector3 worldPos = _gridGenerator.GridToWorld(temp.Position);
+                    GridTile tile = _gridGenerator.GetTileByCenterPoint(worldPos);
+                    if (tile.IsObstacle || (!_localVisitedTiles.Contains(worldPos) && _wirePlacer.VisitedTiles.Contains(worldPos) && worldPos != startPoint))
                     {
                         if (isFinal)
                             ClearCurrentLine(wire);
@@ -133,25 +154,25 @@ public class WirePlacer : MonoBehaviour
             }
 
             foreach (Vector3Int offset in new Vector3Int[]
-            {
-                new(1, 0, 0), new(-1, 0, 0),
-                new(0, 0, 1), new(0, 0, -1)
-            })
+                     {
+                         new(1, 0, 0), new(-1, 0, 0),
+                         new(0, 0, 1), new(0, 0, -1)
+                     })
             {
                 Vector3Int neighborPos = current.Position + offset;
 
                 if (closed.Contains(neighborPos))
                     continue;
 
-                if (!gridGenerator.TryGetTile(neighborPos, out GridTile neighborTile))
+                if (!_gridGenerator.TryGetTile(neighborPos, out GridTile neighborTile))
                     continue;
                 
                 bool isEndTile = neighborPos == end;
                 if (!isEndTile && (neighborTile.IsGenerator || neighborTile.IsObstacle || neighborTile.IsStructure || neighborTile.IsPole))
                     continue;
 
-                Vector3 worldPos = gridGenerator.GridToWorld(neighborPos);
-                if ( _visitedTiles.Contains(worldPos))
+                Vector3 worldPos = _gridGenerator.GridToWorld(neighborPos);
+                if (!_localVisitedTiles.Contains(worldPos) && _wirePlacer.VisitedTiles.Contains(worldPos))
                     continue;
 
                 float gCost = current.GCost + 1f;
@@ -181,7 +202,7 @@ public class WirePlacer : MonoBehaviour
 
     void UpdateLineRenderer(Wire wire, List<Vector3> newTiles, bool isFinal)
     {
-        if (isFinal && !LevelManager.Instance.TryConsumeWire(newTiles.Count - 1))
+        if (isFinal && !LevelManager.Instance.TryConsumeWire(_wirePoints.Count - 1))
         {
             ClearCurrentLine(wire);
             return;
@@ -193,7 +214,7 @@ public class WirePlacer : MonoBehaviour
         {
             _wirePoints.Add(tile);
             if (isFinal && lastTile != tile)
-                _visitedTiles.Add(tile);
+                _localVisitedTiles.Add(tile);
         }
         
         wire.LineRenderer.positionCount = _wirePoints.Count;
@@ -207,37 +228,25 @@ public class WirePlacer : MonoBehaviour
         
         if (isFinal)
         {
-            _wires.Add(wire);
-            wire.Setup(gridGenerator);
+            _wirePlacer.Wires.Add(wire);
+            wire.Setup(_gridGenerator);
+            
+            foreach (Vector3 tile in _localVisitedTiles)
+                _wirePlacer.VisitedTiles.Add(tile);
+            _wirePlacer.VisitedTiles.Remove(wire.StartPoint);
+            _localVisitedTiles.Clear();
+            
             LevelManager.Instance.RecalculatePowerFlow();
-        }
-    }
-
-    void ClearWires ()
-    {
-        _wirePoints.Clear();
-        _visitedTiles.Clear();
-        
-        foreach (Wire wire in _wires)
-            Destroy(wire.gameObject);
-        _wires.Clear();
-        
-        LevelManager.Instance.ClearWires();
-        LevelManager.Instance.RecalculatePowerFlow();
-
-        if (_ghostWire != null)
-        {
-            ClearCurrentLine(_currentWire);
-            ClearCurrentLine(_ghostWire);
         }
     }
 
     void ClearCurrentLine (Wire wire)
     {
-        _isPlacing = false;
-        _startPoint = null;
+        Reset();
         _wirePoints.Clear();
-        Destroy(wire.gameObject);
+        
+        if (wire != null)
+            Destroy(wire.gameObject);
     }
 }
 

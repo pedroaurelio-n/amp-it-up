@@ -39,10 +39,10 @@ public class LevelManager : MonoBehaviour
         return true;
     }
 
-    public void ClearWires ()
+    public void DeletePreviousWire (Wire wire)
     {
-        allWires.Clear();
-        _usedWireLength = 0;
+        allWires.Remove(wire);
+        _usedWireLength -= wire.Length;
         UpdateWireUI();
     }
 
