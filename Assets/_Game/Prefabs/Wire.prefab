@@ -9,9 +9,10 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2159699974768244303}
+  - component: {fileID: -4916349984829570869}
   - component: {fileID: 5135344137018583856}
   m_Layer: 0
-  m_Name: LineRenderer
+  m_Name: Wire
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -32,6 +33,22 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &-4916349984829570869
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6774566887945586278}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0775827894654e69a053d0fd9766b0d6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  <LineRenderer>k__BackingField: {fileID: 5135344137018583856}
+  materials:
+  - {fileID: 2100000, guid: a1fa710dcdcbdd443bb19ec846717731, type: 2}
+  - {fileID: 2100000, guid: 0570adffd198553489da8f797814f6e2, type: 2}
 --- !u!120 &5135344137018583856
 LineRenderer:
   serializedVersion: 2

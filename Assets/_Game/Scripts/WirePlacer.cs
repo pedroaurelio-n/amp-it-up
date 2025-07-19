@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -6,18 +5,18 @@ using UnityEngine;
 public class WirePlacer : MonoBehaviour
 {
     [SerializeField] GridGenerator gridGenerator;
-    [SerializeField] LineRenderer lineRendererPrefab;
-    [SerializeField] LineRenderer ghostLinePrefab;
+    [SerializeField] Wire wirePrefab;
+    [SerializeField] Wire ghostWirePrefab;
     [SerializeField] LayerMask tileLayer;
 
     List<Vector3> _wirePoints = new();
     HashSet<Vector3> _visitedTiles = new();
-    List<LineRenderer> _lineRenderers = new();
+    List<Wire> _wires = new();
 
     bool _isPlacing;
-    Vector3? _startPoint = null;
-    LineRenderer _currentLine = null;
-    LineRenderer _ghostLine = null;
+    Vector3? _startPoint;
+    Wire _currentWire;
+    Wire _ghostWire;
 
     void Update ()
     {
@@ -40,43 +39,41 @@ public class WirePlacer : MonoBehaviour
                     _startPoint = tileCenter;
 
                     _isPlacing = true;
-                    _currentLine = Instantiate(lineRendererPrefab, transform.position, Quaternion.identity, transform);
-                    _currentLine.SetPosition(0, _startPoint.Value);
-                    _currentLine.SetPosition(1, _startPoint.Value + new Vector3(0.1f, 0.1f, 0.1f));
+                    _currentWire = Instantiate(wirePrefab, transform.position, Quaternion.identity, transform);
                     return;
                 }
 
-                if (!tile.IsStructure && !tile.IsPole)
+                if (!tile.IsStructure && !tile.IsPole && !tile.IsGenerator)
                 {
-                    ClearCurrentLine(_currentLine);
+                    ClearCurrentLine(_currentWire);
                     return;
                 }
                 
                 Vector3 endPoint = tileCenter.Value;
-                GeneratePath(_currentLine, _startPoint.Value, endPoint, true);
+                GeneratePath(_currentWire, _startPoint.Value, endPoint, true);
                 _startPoint = null;
-                _currentLine = null;
+                _currentWire = null;
                 _isPlacing = false;
             }
         }
         
         if (_isPlacing)
         {
-            if (_ghostLine == null)
-                _ghostLine = Instantiate(ghostLinePrefab, transform.position, Quaternion.identity, transform);
+            if (_ghostWire == null)
+                _ghostWire = Instantiate(ghostWirePrefab, transform.position, Quaternion.identity, transform);
         
             if (TryRaycastTile(out Vector3? tileCenter))
             {
                 if (tileCenter == null)
                     return;
                 Vector3 endPoint = tileCenter.Value;
-                GeneratePath(_ghostLine, _startPoint.Value, endPoint, false);
+                GeneratePath(_ghostWire, _startPoint.Value, endPoint, false);
             }
         }
         else
         {
-            if (_ghostLine != null)
-                Destroy(_ghostLine.gameObject);
+            if (_ghostWire != null)
+                Destroy(_ghostWire.gameObject);
         }
 
         if (Input.GetMouseButtonDown(1))
@@ -97,7 +94,7 @@ public class WirePlacer : MonoBehaviour
         return success;
     }
 
-    void GeneratePath (LineRenderer line, Vector3 startPoint, Vector3 endPoint, bool isFinal)
+    void GeneratePath (Wire wire, Vector3 startPoint, Vector3 endPoint, bool isFinal)
     {
         Vector3Int start = gridGenerator.WorldToGrid(startPoint);
         Vector3Int end = gridGenerator.WorldToGrid(endPoint);
@@ -124,14 +121,14 @@ public class WirePlacer : MonoBehaviour
                     if (_visitedTiles.Contains(worldPos) && worldPos != startPoint)
                     {
                         if (isFinal)
-                            ClearCurrentLine(line);
+                            ClearCurrentLine(wire);
                         return;
                     }
                     path.Insert(0, worldPos);
                     temp = temp.Parent;
                 }
 
-                UpdateLineRenderer(line, path, isFinal);
+                UpdateLineRenderer(wire, path, isFinal);
                 return;
             }
 
@@ -179,11 +176,17 @@ public class WirePlacer : MonoBehaviour
         }
         
         if (isFinal)
-            ClearCurrentLine(line);
+            ClearCurrentLine(wire);
     }
 
-    void UpdateLineRenderer(LineRenderer line, List<Vector3> newTiles, bool isFinal)
+    void UpdateLineRenderer(Wire wire, List<Vector3> newTiles, bool isFinal)
     {
+        if (isFinal && !LevelManager.Instance.TryConsumeWire(newTiles.Count - 1))
+        {
+            ClearCurrentLine(wire);
+            return;
+        }
+        
         _wirePoints.Clear();
         Vector3 lastTile = newTiles[^1];
         foreach (Vector3 tile in newTiles)
@@ -193,11 +196,21 @@ public class WirePlacer : MonoBehaviour
                 _visitedTiles.Add(tile);
         }
         
-        line.positionCount = _wirePoints.Count;
-        line.SetPositions(_wirePoints.ToArray());
+        wire.LineRenderer.positionCount = _wirePoints.Count;
+
+        for (int index = 0; index < _wirePoints.Count; index++)
+        {
+            Vector3 point = _wirePoints[index];
+            wire.LineRenderer.positionCount = _wirePoints.Count;
+            wire.LineRenderer.SetPosition(index,point + Vector3.up * 3);
+        }
         
         if (isFinal)
-            _lineRenderers.Add(line);
+        {
+            _wires.Add(wire);
+            wire.Setup(gridGenerator);
+            LevelManager.Instance.RecalculatePowerFlow();
+        }
     }
 
     void ClearWires ()
@@ -205,17 +218,26 @@ public class WirePlacer : MonoBehaviour
         _wirePoints.Clear();
         _visitedTiles.Clear();
         
-        foreach (LineRenderer line in _lineRenderers)
-            Destroy(line.gameObject);
-        _lineRenderers.Clear();
+        foreach (Wire wire in _wires)
+            Destroy(wire.gameObject);
+        _wires.Clear();
+        
+        LevelManager.Instance.ClearWires();
+        LevelManager.Instance.RecalculatePowerFlow();
+
+        if (_ghostWire != null)
+        {
+            ClearCurrentLine(_currentWire);
+            ClearCurrentLine(_ghostWire);
+        }
     }
 
-    void ClearCurrentLine (LineRenderer line)
+    void ClearCurrentLine (Wire wire)
     {
         _isPlacing = false;
         _startPoint = null;
         _wirePoints.Clear();
-        Destroy(line.gameObject);
+        Destroy(wire.gameObject);
     }
 }
 

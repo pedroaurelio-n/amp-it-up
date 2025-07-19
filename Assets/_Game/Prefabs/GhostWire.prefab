@@ -9,9 +9,10 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2159699974768244303}
+  - component: {fileID: 6443915839132470345}
   - component: {fileID: 5135344137018583856}
   m_Layer: 0
-  m_Name: GhostLineRenderer
+  m_Name: GhostWire
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -32,6 +33,22 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &6443915839132470345
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6774566887945586278}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0775827894654e69a053d0fd9766b0d6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  <LineRenderer>k__BackingField: {fileID: 5135344137018583856}
+  materials:
+  - {fileID: 2100000, guid: 06159896a7304a542a493fd7174c5dee, type: 2}
+  - {fileID: 2100000, guid: 06159896a7304a542a493fd7174c5dee, type: 2}
 --- !u!120 &5135344137018583856
 LineRenderer:
   serializedVersion: 2
@@ -53,7 +70,7 @@ LineRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 2c4994556029d7847acbb3a9eb003bc8, type: 2}
+  - {fileID: 2100000, guid: 06159896a7304a542a493fd7174c5dee, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
