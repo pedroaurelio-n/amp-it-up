@@ -1,12 +1,15 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 public class Wire : MonoBehaviour
 {
     [field: SerializeField] public LineRenderer LineRenderer { get; private set; }
 
+    [SerializeField] WireMeshGenerator wireMeshGenerator;
     [SerializeField] Material[] materials;
     [SerializeField] ParticleSystem startBurst;
     [SerializeField] ParticleSystem endBurst;
+    [SerializeField, ColorUsage(true, true)] Color poweredColor;
     
     public Vector3 StartPoint => new(LineRenderer.GetPosition(0).x, 0f, LineRenderer.GetPosition(0).z);
 
@@ -39,11 +42,24 @@ public class Wire : MonoBehaviour
         LevelManager.Instance.RegisterWire(this);
     }
 
+    public void SetWireMesh ()
+    {
+        Vector3[] pos = new Vector3[LineRenderer.positionCount];
+        LineRenderer.GetPositions(pos);
+        wireMeshGenerator.GenerateMesh(pos);
+        LineRenderer.enabled = false;
+    }
+
     public void SetPoweredState (bool active)
     {
         bool oldState = IsPowered;
         IsPowered = active;
         LineRenderer.material = IsPowered ? materials[1] : materials[0];
+        
+        Material wireMat = wireMeshGenerator.MeshMaterial;
+        wireMat.SetColor("_BaseColor", IsPowered ? poweredColor : Color.black);
+        wireMat.SetFloat("_PulseIntensity", IsPowered ? 2f : 0f);
+        wireMat.SetFloat("_WaveTime", IsPowered ? 3.2f : 0f);
 
         if (IsPowered && !oldState)
         {

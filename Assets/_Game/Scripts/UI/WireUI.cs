@@ -5,7 +5,9 @@ public class WireUI : MonoBehaviour
 {
     [SerializeField] TextMeshProUGUI currentWireRemainingText;
     [SerializeField] TextMeshProUGUI startWireRemainingText;
+    [SerializeField] GameObject minusWireContainer;
     [SerializeField] TextMeshProUGUI minusWireText;
+    [SerializeField] GameObject percentageSymbol;
     [SerializeField] Color normalColor;
     [SerializeField] Color discountedColor;
 
@@ -17,7 +19,8 @@ public class WireUI : MonoBehaviour
 
     public void SetMinusWireText (bool active, bool discounted = false, string value = "")
     {
-        minusWireText.gameObject.SetActive(active);
+        minusWireContainer.gameObject.SetActive(active);
+        percentageSymbol.SetActive(discounted);
         minusWireText.text = value;
         minusWireText.color = discounted ? discountedColor : normalColor;
     }

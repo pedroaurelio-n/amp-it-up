@@ -64,7 +64,7 @@ public class AudioEventListener : MonoBehaviour
 
     void HandleStructuredPowered ()
     {
-        Invoke(nameof(PlayStructureAudio), 0.2f);
+        Invoke(nameof(PlayStructureAudio), 0.3f);
     }
 
     void HandleWirePlaced ()

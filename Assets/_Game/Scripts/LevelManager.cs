@@ -35,6 +35,7 @@ public class LevelManager : MonoBehaviour
     public int RemainingWireLength => startingWireLength - _usedWireLength;
     public bool CanInput { get; private set; } = true;
     
+    GoalUI _goalUI;
     int _usedWireLength;
     
     void Awake ()
@@ -42,6 +43,8 @@ public class LevelManager : MonoBehaviour
         if (Instance != null)
             Destroy(gameObject);
         Instance = this;
+        
+        _goalUI = FindObjectOfType<GoalUI>();
     }
 
     void Start ()
@@ -72,7 +75,12 @@ public class LevelManager : MonoBehaviour
     }
     
     public void RegisterGenerator (Generator gen) => generators.Add(gen);
-    public void RegisterStructure (Structure s) => structures.Add(s);
+    public void RegisterStructure (Structure s)
+    {
+        structures.Add(s);
+        _goalUI.SetStructuresText($"{0}", structures.Count.ToString());
+    }
+
     public void RegisterPole (Pole p) => poles.Add(p);
     public void RegisterWire (Wire w) => allWires.Add(w);
     
@@ -111,6 +119,8 @@ public class LevelManager : MonoBehaviour
             else
                 OnWirePlaced?.Invoke();
         }
+        
+        _goalUI.SetStructuresText(poweredStructures.Count.ToString(), structures.Count.ToString());
 
         if (poweredStructures.Count != structures.Count)
             return;

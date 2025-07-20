@@ -231,6 +231,7 @@ public class ManualWirePlacer : MonoBehaviour
         Reset();
         LevelManager.Instance.RecalculatePowerFlow(true);
         _wirePlacer.CurrentWire.Price = roundedCost;
+        _wirePlacer.CurrentWire.SetWireMesh();
             
         Destroy(_wirePlacer.GhostWire.gameObject);
     }

@@ -40,7 +40,7 @@ public class Structure : MonoBehaviour
     {
         if (animationCoroutine == null)
             return;
-        DOTween.KillAll();
+        //DOTween.KillAll();
         StopCoroutine(animationCoroutine);
         animationCoroutine = null;
         transform.GetChild(0).GetChild(0).DOScale(Vector3.one, 0.3f);

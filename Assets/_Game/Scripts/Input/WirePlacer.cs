@@ -34,6 +34,7 @@ public class WirePlacer : MonoBehaviour
                 autoWirePlacer.gameObject.SetActive(false);
                 manualWirePlacer.gameObject.SetActive(true);
             }
+            LevelManager.Instance.TriggerOnGhostWireUpdated();
         }
     }
 

@@ -275,6 +275,7 @@ public class AutoWirePlacer : MonoBehaviour
             _localVisitedTiles.Clear();
 
             wire.Price = roundedCost;
+            wire.SetWireMesh();
             
             LevelManager.Instance.RecalculatePowerFlow(true);
         }
