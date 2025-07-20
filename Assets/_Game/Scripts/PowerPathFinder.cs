@@ -43,6 +43,46 @@ public static class PowerPathFinder
         return connectedStructures;
     }
     
+    public static List<Pole> FindPolesConnected(Generator generator, List<Wire> wires)
+    {
+        HashSet<GridTile> visited = new();
+        Queue<GridTile> queue = new();
+        List<Pole> connectedPole = new();
+
+        GridTile root = generator.GetComponent<GridTile>();
+        queue.Enqueue(root);
+        visited.Add(root);
+
+        while (queue.Count > 0)
+        {
+            GridTile current = queue.Dequeue();
+
+            foreach (Wire wire in wires)
+            {
+                GridTile neighbor;
+                
+                if (wire.GetStartTile() == current)
+                    neighbor = wire.GetEndTile();
+                else if (wire.GetEndTile() == current)
+                    neighbor = wire.GetStartTile();
+                else
+                    continue;
+
+                if (neighbor == null || visited.Contains(neighbor))
+                    continue;
+                
+                visited.Add(neighbor);
+
+                if (neighbor.IsPole)
+                    connectedPole.Add(neighbor.GetComponent<Pole>());
+                else if (neighbor.IsGenerator)
+                    queue.Enqueue(neighbor);
+            }
+        }
+
+        return connectedPole;
+    }
+    
     public static List<Wire> SetPoweredWiresFromGenerator(Generator generator, List<Wire> allWires)
     {
         HashSet<GridTile> visitedTiles = new();

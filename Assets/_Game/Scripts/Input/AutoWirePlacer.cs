@@ -46,19 +46,31 @@ public class AutoWirePlacer : MonoBehaviour
             if (TryRaycastTile(out Vector3? tileCenter))
             {
                 if (tileCenter == null)
+                {
+                    LevelManager.Instance.TriggerOnWireImpossible();
                     return;
+                }
 
                 GridTile tile = _gridGenerator.GetTileByCenterPoint(tileCenter.Value);
                 if (tile == null || tile.IsObstacle)
                 {
                     ClearCurrentLine(_wirePlacer.CurrentWire);
+                    LevelManager.Instance.TriggerOnWireImpossible();
                     return;
                 }
                 
                 if (_startPoint == null)
                 {
                     if (!tile.IsGenerator && !tile.IsPole)
+                    {
+                        LevelManager.Instance.TriggerOnWireImpossible();
                         return;
+                    }
+
+                    tile.TryGetComponent(out Generator generator);
+                    tile.TryGetComponent(out Pole pole);
+                    generator?.Click();
+                    pole?.Click();
                     
                     _startPoint = tileCenter;
 
@@ -71,8 +83,16 @@ public class AutoWirePlacer : MonoBehaviour
                 if (tile.IsObstacle || (!tile.IsStructure && !tile.IsPole && !tile.IsGenerator))
                 {
                     ClearCurrentLine(_wirePlacer.CurrentWire);
+                    LevelManager.Instance.TriggerOnWireImpossible();
                     return;
                 }
+                
+                tile.TryGetComponent(out Generator generator2);
+                tile.TryGetComponent(out Pole pole2);
+                tile.TryGetComponent(out Structure structure2);
+                generator2?.Click();
+                pole2?.Click();
+                structure2?.Click();
                 
                 Vector3 endPoint = tileCenter.Value;
                 GenerateAutomaticPath(_wirePlacer.CurrentWire, _startPoint.Value, endPoint, true);
@@ -81,7 +101,10 @@ public class AutoWirePlacer : MonoBehaviour
                 IsPlacing = false;
             }
             else
+            {
                 ClearCurrentLine(_wirePlacer.CurrentWire);
+                LevelManager.Instance.TriggerOnWireImpossible();
+            }
         }
         
         if (IsPlacing)
@@ -209,6 +232,9 @@ public class AutoWirePlacer : MonoBehaviour
 
     void UpdateLineRenderer(Wire wire, List<Vector3> newTiles, bool isFinal)
     {
+        if (!isFinal && _wirePoints.Count != newTiles.Count)
+            LevelManager.Instance.TriggerOnGhostWireUpdated();
+        
         bool isConnectedToPole = _gridGenerator.GetTileByCenterPoint(newTiles[0]).IsPole
                                  || _gridGenerator.GetTileByCenterPoint(newTiles[^1]).IsPole;
         float multiplier = isConnectedToPole ? 0.75f : 1f;
@@ -250,7 +276,7 @@ public class AutoWirePlacer : MonoBehaviour
 
             wire.Price = roundedCost;
             
-            LevelManager.Instance.RecalculatePowerFlow();
+            LevelManager.Instance.RecalculatePowerFlow(true);
         }
     }
 

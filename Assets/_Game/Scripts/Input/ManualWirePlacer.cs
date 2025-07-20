@@ -45,16 +45,30 @@ public class ManualWirePlacer : MonoBehaviour
             if (TryRaycastTile(out Vector3? tileCenter))
             {
                 if (tileCenter == null)
+                {
+                    LevelManager.Instance.TriggerOnWireImpossible();
                     return;
+                }
 
                 GridTile tile = _gridGenerator.GetTileByCenterPoint(tileCenter.Value);
                 if (tile == null || tile.IsObstacle)
+                {
+                    LevelManager.Instance.TriggerOnWireImpossible();
                     return;
+                }
                 
                 if (_startPoint == null)
                 {
                     if (!tile.IsGenerator && !tile.IsPole)
+                    {
+                        LevelManager.Instance.TriggerOnWireImpossible();
                         return;
+                    }
+                    
+                    tile.TryGetComponent(out Generator generator);
+                    tile.TryGetComponent(out Pole pole);
+                    generator?.Click();
+                    pole?.Click();
                     
                     _startPoint = tileCenter;
                     
@@ -75,6 +89,7 @@ public class ManualWirePlacer : MonoBehaviour
                 if (tileCenter == null)
                     return;
                 Vector3 endPoint = tileCenter.Value;
+                endPoint.y = 0f;
                 if (!_localVisitedTiles.Contains(endPoint) && !_wirePlacer.VisitedTiles.Contains(endPoint) && IsAdjacent(endPoint))
                 {
                     _wirePlacer.GhostWire.LineRenderer.positionCount = _wirePoints.Count + 1;
@@ -117,6 +132,7 @@ public class ManualWirePlacer : MonoBehaviour
         if (Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out RaycastHit hit, 100f, tileLayer))
         {
             Vector3 tileCenter = hit.collider.transform.position;
+            tileCenter.y = 0f;
             GridTile tile = _gridGenerator.GetTileByCenterPoint(tileCenter);
 
             if (!IsPlacing)
@@ -132,7 +148,22 @@ public class ManualWirePlacer : MonoBehaviour
                     if (!tile.IsStructure && !tile.IsPole && !tile.IsGenerator)
                         AddPoint(tileCenter, false);
                     else
+                    {
+                        if (tile.IsPole || tile.IsGenerator)
+                        {
+                            tile.TryGetComponent(out Generator generator);
+                            tile.TryGetComponent(out Pole pole);
+                            tile.TryGetComponent(out Structure structure);
+                            generator?.Click();
+                            pole?.Click();
+                            structure?.Click();
+                        }
                         AddPoint(tileCenter, true);
+                    }
+                }
+                else
+                {
+                    LevelManager.Instance.TriggerOnWireImpossible();
                 }
             }
         }
@@ -140,9 +171,12 @@ public class ManualWirePlacer : MonoBehaviour
 
     void AddPoint(Vector3 point, bool isFinal)
     {
+        point.y = 0f;
         _wirePoints.Add(point);
         _localVisitedTiles.Add(point);
         UpdateLineRenderer(_wirePlacer.GhostWire, isFinal);
+        if (!isFinal)
+            LevelManager.Instance.TriggerOnGhostWireUpdated();
     }
     
     bool IsAdjacent(Vector3 point)
@@ -195,7 +229,7 @@ public class ManualWirePlacer : MonoBehaviour
         _localVisitedTiles.Clear();
         
         Reset();
-        LevelManager.Instance.RecalculatePowerFlow();
+        LevelManager.Instance.RecalculatePowerFlow(true);
         _wirePlacer.CurrentWire.Price = roundedCost;
             
         Destroy(_wirePlacer.GhostWire.gameObject);

@@ -94,6 +94,8 @@ public class WirePlacer : MonoBehaviour
 
     void ClearPreviousWire ()
     {
+        if (Wires.Count > 0 || GhostWire != null)
+            LevelManager.Instance.TriggerWireDestroyed();
         if (Wires.Count <= 0)
         {
             if (GhostWire != null)
@@ -120,7 +122,7 @@ public class WirePlacer : MonoBehaviour
         RefreshVisitedTiles();
 
         LevelManager.Instance.DeletePreviousWire(previousWire);
-        LevelManager.Instance.RecalculatePowerFlow();
+        LevelManager.Instance.RecalculatePowerFlow(false);
         
         Destroy(previousWire.gameObject);
     }
