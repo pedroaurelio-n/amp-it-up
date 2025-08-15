@@ -6,6 +6,11 @@ public static class GameManager
     {
         SceneManager.LoadScene(0);
     }
+    
+    public static void GoToLevel (int level)
+    {
+        SceneManager.LoadScene(level);
+    }
 
     public static void AdvanceLevel ()
     {

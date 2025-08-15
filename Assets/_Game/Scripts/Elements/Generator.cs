@@ -13,6 +13,8 @@ public class Generator : MonoBehaviour
     
     public void Click ()
     {
+        if (transform.childCount == 0)
+            return;
         if (animationCoroutine != null)
             return;
         animationCoroutine = StartCoroutine(AnimationRoutine());

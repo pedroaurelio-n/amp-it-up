@@ -72,6 +72,8 @@ public class ManualWirePlacer : MonoBehaviour
                     
                     _startPoint = tileCenter;
                     
+                    _wirePlacer.CurrentWire = Instantiate(wirePrefab, transform.position, Quaternion.identity, _wirePlacer.transform);
+                    _wirePlacer.CurrentWire.LineRenderer.positionCount = 0;
                     _wirePlacer.GhostWire = Instantiate(ghostWirePrefab, transform.position, Quaternion.identity, _wirePlacer.transform);
                     _wirePlacer.GhostWire.LineRenderer.SetPosition(0, _startPoint.Value + Vector3.up * 0.5f);
                     TryStartOrExtendWire();
@@ -212,8 +214,7 @@ public class ManualWirePlacer : MonoBehaviour
             ClearCurrentLine(wire);
             return;
         }
-            
-        _wirePlacer.CurrentWire = Instantiate(wirePrefab, transform.position, Quaternion.identity, _wirePlacer.transform);
+        
         _wirePlacer.CurrentWire.LineRenderer.positionCount = _wirePlacer.GhostWire.LineRenderer.positionCount;
         for (int i = 0; i < _wirePlacer.GhostWire.LineRenderer.positionCount; i++)
             _wirePlacer.CurrentWire.LineRenderer.SetPosition(i, _wirePlacer.GhostWire.LineRenderer.GetPosition(i));
@@ -224,6 +225,7 @@ public class ManualWirePlacer : MonoBehaviour
         foreach (Vector3 tile in _localVisitedTiles)
             _wirePlacer.VisitedTiles.Add(tile);
         _wirePlacer.VisitedTiles.Remove(_wirePlacer.CurrentWire.StartPoint);
+        _wirePlacer.VisitedTiles.Remove(_wirePlacer.CurrentWire.EndPoint);
         //TODO pedro: multiple end points
         // _wirePlacer.VisitedTiles.Remove(_wirePlacer.CurrentWire.EndPoint);
         _localVisitedTiles.Clear();

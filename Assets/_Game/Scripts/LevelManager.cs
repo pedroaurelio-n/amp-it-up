@@ -150,6 +150,8 @@ public class LevelManager : MonoBehaviour
         {
             mesh.enabled = false;
         }
+        PlayerPrefs.SetInt($"Level_{levelNumber + 1}", 1);
+        PlayerPrefs.Save();
         OnVictory?.Invoke();
         OnLevelCompleted?.Invoke();
     }

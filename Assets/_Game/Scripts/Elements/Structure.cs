@@ -31,6 +31,8 @@ public class Structure : MonoBehaviour
 
     void OnPowered()
     {
+        if (transform.childCount == 0)
+            return;
         if (animationCoroutine != null)
             return;
         animationCoroutine = StartCoroutine(AnimationRoutine());
@@ -38,6 +40,8 @@ public class Structure : MonoBehaviour
 
     void OnDepowered()
     {
+        if (transform.childCount == 0)
+            return;
         if (animationCoroutine == null)
             return;
         //DOTween.KillAll();
@@ -72,6 +76,8 @@ public class Structure : MonoBehaviour
     
     public void Click ()
     {
+        if (transform.childCount == 0)
+            return;
         if (clickAnimationCoroutine != null || animationCoroutine != null)
             return;
         clickAnimationCoroutine = StartCoroutine(ClickAnimationRoutine());

@@ -5784,8 +5784,8 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 'Connect to energy poles to create relay points and cheapen the amount
-    of wire spent.
+  m_text: 'Connect to <color=#0438FF>energy poles</color> to create relay points
+    and cheapen the amount of wire spent.
 
 '
   m_isRightToLeft: 0

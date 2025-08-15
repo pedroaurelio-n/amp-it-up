@@ -4278,7 +4278,8 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Use the left click to connect generators to structures and power them.
+  m_text: Use the left click to connect <color=#51088E>generators</color> to <color=#1BB100>structures</color>
+    and power them.
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 06055cf6c7aaf2c49a9e0eca055f7080, type: 2}
   m_sharedMaterial: {fileID: 2100000, guid: dab8b30621c390b408573c8c5a3ad631, type: 2}

@@ -103,7 +103,6 @@ public class AutoWirePlacer : MonoBehaviour
             else
             {
                 ClearCurrentLine(_wirePlacer.CurrentWire);
-                LevelManager.Instance.TriggerOnWireImpossible();
             }
         }
         

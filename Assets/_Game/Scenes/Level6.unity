@@ -6003,7 +6003,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 'You can change the placement mode to manual using the scroll whell if
+  m_text: 'You can change the placement mode to manual using the scroll wheel if
     you want.
 
 '

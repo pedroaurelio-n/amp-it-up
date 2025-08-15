@@ -5332,7 +5332,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Obstacles will block the path of your wires.
+  m_text: <color=#FD0909>Obstacles</color> will block the path of your wires.
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 06055cf6c7aaf2c49a9e0eca055f7080, type: 2}
   m_sharedMaterial: {fileID: 2100000, guid: dab8b30621c390b408573c8c5a3ad631, type: 2}

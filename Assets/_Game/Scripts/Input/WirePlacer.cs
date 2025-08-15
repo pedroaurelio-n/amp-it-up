@@ -67,19 +67,24 @@ public class WirePlacer : MonoBehaviour
         
         if (Input.GetMouseButtonDown(2) || Input.mouseScrollDelta.y != 0)
         {
-            if (!autoWirePlacer.IsPlacing && !manualWirePlacer.IsPlacing)
-            {
-                if (CurrentInput == InputMode.Auto)
-                    CurrentInput = InputMode.Manual;
-                else if (CurrentInput == InputMode.Manual)
-                    CurrentInput = InputMode.Auto;
-            }
+            ChangeInput();
         }
 
         if (Input.GetMouseButtonDown(1))
             ClearPreviousWire();
     }
-    
+
+    public void ChangeInput ()
+    {
+        if (!autoWirePlacer.IsPlacing && !manualWirePlacer.IsPlacing)
+        {
+            if (CurrentInput == InputMode.Auto)
+                CurrentInput = InputMode.Manual;
+            else if (CurrentInput == InputMode.Manual)
+                CurrentInput = InputMode.Auto;
+        }
+    }
+
     public void RefreshVisitedTiles ()
     {
         VisitedTiles.Clear();
